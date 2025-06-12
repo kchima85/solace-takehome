@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface SearchBarProps {
     value: string;
@@ -8,6 +9,7 @@ interface SearchBarProps {
     resetButtonLabel?: string;
     autoFocus?: boolean;
     disabled?: boolean;
+    className?: string;
 }
 
 export default function SearchBar({
@@ -18,9 +20,10 @@ export default function SearchBar({
     resetButtonLabel,
     autoFocus = false,
     disabled = false,
+    className,
 }: SearchBarProps) {
     return (
-        <div className="flex flex-col items-start w-full">
+        <div className={cn("flex flex-col items-start w-full", className)}>
             <div className="flex gap-2 w-full max-w-md">
                 <Input
                     type="text"

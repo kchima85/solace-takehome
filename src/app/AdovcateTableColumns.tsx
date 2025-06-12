@@ -1,8 +1,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Advocate } from "@/app/types";
-import { formatPhoneNumber } from "../../../lib/utils";
+import { formatPhoneNumber } from "../lib/utils";
 
-export const columns: ColumnDef<Advocate>[] = [
+export const AdvocateTableColumns: ColumnDef<Advocate>[] = [
     {
         accessorKey: "firstName",
         header: "First Name",

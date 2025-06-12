@@ -5,13 +5,15 @@ import {
     flexRender,
     ColumnDef,
 } from "@tanstack/react-table";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<T> {
     data: T[];
     columns: ColumnDef<T, any>[];
+    className?: string;
 }
 
-export function DataTable<T>({ data, columns }: DataTableProps<T>) {
+export function DataTable<T>({ data, columns, className }: DataTableProps<T>) {
     const table = useReactTable({
         data,
         columns,
@@ -20,7 +22,12 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
 
     if (!data || data.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 bg-white rounded-md border border-solace-blue shadow">
+            <div
+                className={cn(
+                    "flex flex-col items-center justify-center py-16 bg-white rounded-md border border-solace-blue shadow",
+                    className
+                )}
+            >
                 <svg
                     className="w-12 h-12 text-solace-blue mb-4"
                     fill="none"
@@ -39,7 +46,12 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
     }
 
     return (
-        <div className="rounded-md border border-solace-blue shadow bg-white">
+        <div
+            className={cn(
+                "rounded-md border border-solace-blue shadow bg-white",
+                className
+            )}
+        >
             <table className="min-w-full divide-y divide-solace-blue">
                 <thead className="bg-solace-cream">
                     {table.getHeaderGroups().map((headerGroup) => (
