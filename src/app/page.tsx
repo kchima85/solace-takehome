@@ -50,13 +50,14 @@ export default function Home() {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    setFilteredAdvocates(filteredAdvocates);
-  };
+    const handleSearchOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
 
-  const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
-  };
+    const handleResetSearchOnClick = () => {
+        setSearchTerm("");
+        fetchAdvocates();
+    };
 
   return (
     <main style={{ margin: "24px" }}>
