@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+// components
+import { DataTable } from "../components/ui/Table/Table";
+import SearchBar from "../components/ui/Search/SearchBar";
+import { Loader2 } from "lucide-react";
+
+// types
+import { Advocate } from "./types";
+
 export default function Home() {
     const [advocates, setAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>("");
