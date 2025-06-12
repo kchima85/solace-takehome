@@ -16,22 +16,29 @@ export default function Home() {
     });
   }, []);
 
-  const onChange = (e) => {
-    const searchTerm = e.target.value;
+    useEffect(() => {
+        if (searchTerm === "") {
+            fetchAdvocates();
+            return;
+        }
 
-    document.getElementById("search-term").innerHTML = searchTerm;
+        const handler = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(
+                    `/api/advocates/search?q=${searchTerm.toLowerCase()}`
+                );
+                const jsonifiedResponse = await response.json();
+                setAdvocates(jsonifiedResponse.data);
+                setLoading(false);
+            } catch (error) {
+                setError(true);
+                setLoading(false);
+            }
+        }, 400); // 400ms debounce
 
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.includes(searchTerm)
-      );
-    });
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
 
     setFilteredAdvocates(filteredAdvocates);
   };
