@@ -3,18 +3,28 @@
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+    const [advocates, setAdvocates] = useState<Advocate[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<boolean>(false);
 
-  useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
-      });
-    });
-  }, []);
+    const fetchAdvocates = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch("/api/advocates");
+            const jsonifiedResponse = await response.json();
+            console.log(jsonifiedResponse);
+            setAdvocates(jsonifiedResponse.data);
+            setLoading(false);
+        } catch (error) {
+            setError(true);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAdvocates();
+    }, []);
 
     useEffect(() => {
         if (searchTerm === "") {
