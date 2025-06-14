@@ -2,90 +2,99 @@
 
 import { useEffect, useState } from "react";
 
+// components
+import { DataTable } from "../components/ui/Table/Table";
+import SearchBar from "../components/ui/Search/SearchBar";
+import Error from "@/components/ui/Error";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { AdvocateTableColumns } from "./AdovcateTableColumns";
+
+// types
+import { Advocate } from "./types";
+
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+    const [advocates, setAdvocates] = useState<Advocate[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<boolean>(false);
 
-  useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
-      });
-    });
-  }, []);
+    const fetchAdvocates = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch("/api/advocates");
+            const jsonifiedResponse = await response.json();
+            console.log(jsonifiedResponse);
+            setAdvocates(jsonifiedResponse.data);
+            setLoading(false);
+        } catch (error) {
+            setError(true);
+            setLoading(false);
+        }
+    };
 
-  const onChange = (e) => {
-    const searchTerm = e.target.value;
+    useEffect(() => {
+        fetchAdvocates();
+    }, []);
 
-    document.getElementById("search-term").innerHTML = searchTerm;
+    useEffect(() => {
+        if (searchTerm === "") {
+            fetchAdvocates();
+            return;
+        }
 
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.includes(searchTerm)
-      );
-    });
+        const handler = setTimeout(async () => {
+            setLoading(true);
+            try {
+                const response = await fetch(
+                    `/api/advocates/search?q=${searchTerm.toLowerCase()}`
+                );
+                const jsonifiedResponse = await response.json();
+                setAdvocates(jsonifiedResponse.data);
+                setLoading(false);
+            } catch (error) {
+                setError(true);
+                setLoading(false);
+            }
+        }, 400); // 400ms debounce
 
-    setFilteredAdvocates(filteredAdvocates);
-  };
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
 
-  const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
-  };
+    const handleSearchOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
 
-  return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
-        </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
-      </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>City</th>
-          <th>Degree</th>
-          <th>Specialties</th>
-          <th>Years of Experience</th>
-          <th>Phone Number</th>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate) => {
-            return (
-              <tr>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </main>
-  );
+    const handleResetSearchOnClick = () => {
+        setSearchTerm("");
+        fetchAdvocates();
+    };
+
+    return (
+        <main className="min-h-screen bg-solace-white px-6 py-8">
+            <h1 className="text-3xl font-bold text-solace-dark">
+                Solace Advocates
+            </h1>
+            <div className="my-4">
+                <SearchBar
+                    value={searchTerm}
+                    onChange={handleSearchOnChange}
+                    onReset={handleResetSearchOnClick}
+                    placeholder="Search advocates..."
+                    resetButtonLabel="Reset"
+                />
+            </div>
+            {error ? (
+                <Error message="Failed to load advocates. Please try again later." />
+            ) : loading ? (
+                <LoadingSpinner message="Loading advocates..." />
+            ) : (
+                <div className="rounded-md border border-solace-blue bg-white shadow">
+                    <DataTable
+                        data={advocates}
+                        columns={AdvocateTableColumns}
+                    />
+                </div>
+            )}
+        </main>
+    );
 }
